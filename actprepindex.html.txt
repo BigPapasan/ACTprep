@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACT Prep Pro - Ultimate Test Prep Suite</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        .flip-card {
+            background-color: transparent;
+            perspective: 1000px;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 1rem;
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- TOP NAV BAR -->
+    <nav class="bg-slate-800/80 backdrop-blur border-b border-slate-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo & Title -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('dashboard')">
+                    <div class="bg-gradient-to-tr from-indigo-500 to-purple-500 text-white p-2.5 rounded-xl shadow-lg shadow-indigo-500/20">
+                        <i class="fa-solid fa-graduation-cap text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-xl tracking-tight bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">ACT Prep Pro</span>
+                        <span class="hidden sm:inline-block text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full font-medium ml-2 border border-indigo-500/30">2026 Edition</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Links -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn text-indigo-400 bg-slate-700/60 px-3.5 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2">
+                        <i class="fa-solid fa-chart-line"></i><span>Dashboard</span>
+                    </button>
+                    <button onclick="switchTab('practice')" id="nav-practice" class="nav-btn text-slate-300 hover:text-white hover:bg-slate-700/40 px-3.5 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2">
+                        <i class="fa-solid fa-pen-to-square"></i><span>Practice Engine</span>
+                    </button>
+                    <button onclick="switchTab('flashcards')" id="nav-flashcards" class="nav-btn text-slate-300 hover:text-white hover:bg-slate-700/40 px-3.5 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2">
+                        <i class="fa-solid fa-layer-group"></i><span>Flashcards</span>
+                    </button>
+                    <button onclick="switchTab('cheatsheets')" id="nav-cheatsheets" class="nav-btn text-slate-300 hover:text-white hover:bg-slate-700/40 px-3.5 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2">
+                        <i class="fa-solid fa-book-bookmark"></i><span>Cheat Sheets</span>
+                    </button>
+                    <button onclick="switchTab('tools')" id="nav-tools" class="nav-btn text-slate-300 hover:text-white hover:bg-slate-700/40 px-3.5 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2">
+                        <i class="fa-solid fa-calculator"></i><span>Math Tools</span>
+                    </button>
+                </div>
+
+                <!-- User Quick Stats & Mobile Toggle -->
+                <div class="flex items-center space-x-3">
+                    <div class="hidden sm:flex items-center bg-slate-700/40 border border-slate-700 rounded-lg px-3 py-1.5 space-x-3 text-xs">
+                        <div class="flex items-center text-amber-400" title="Streak Days">
+                            <i class="fa-solid fa-fire mr-1"></i>
+                            <span id="nav-streak-count" class="font-bold">5</span>d
+                        </div>
+                        <div class="h-3 w-[1px] bg-slate-600"></div>
+                        <div class="flex items-center text-emerald-400" title="Estimated Score">
+                            <i class="fa-solid fa-trophy mr-1"></i>
+                            <span id="nav-est-score" class="font-bold">28</span> ACT
+                        </div>
+                    </div>
+
+                    <!-- Reset Data Button -->
+                    <button onclick="confirmResetData()" title="Reset All Progress Data" class="text-slate-400 hover:text-rose-400 transition p-2 rounded-lg hover:bg-slate-700/50">
+                        <i class="fa-solid fa-rotate-left text-sm"></i>
+                    </button>
+
+                    <!-- Mobile Menu Button -->
+                    <button onclick="toggleMobileMenu()" class="md:hidden text-slate-300 p-2 rounded-lg hover:bg-slate-700">
+                        <i class="fa-solid fa-bars text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden border-b border-slate-700 bg-slate-800 px-4 pt-2 pb-4 space-y-1">
+            <button onclick="switchTab('dashboard'); toggleMobileMenu()" class="w-full text-left text-slate-200 px-3 py-2 rounded-md font-medium hover:bg-slate-700 flex items-center space-x-2">
+                <i class="fa-solid fa-chart-line w-5 text-indigo-400"></i><span>Dashboard</span>
+            </button>
+            <button onclick="switchTab('practice'); toggleMobileMenu()" class="w-full text-left text-slate-200 px-3 py-2 rounded-md font-medium hover:bg-slate-700 flex items-center space-x-2">
+                <i class="fa-solid fa-pen-to-square w-5 text-emerald-400"></i><span>Practice Engine</span>
+            </button>
+            <button onclick="switchTab('flashcards'); toggleMobileMenu()" class="w-full text-left text-slate-200 px-3 py-2 rounded-md font-medium hover:bg-slate-700 flex items-center space-x-2">
+                <i class="fa-solid fa-layer-group w-5 text-amber-400"></i><span>Flashcards</span>
+            </button>
+            <button onclick="switchTab('cheatsheets'); toggleMobileMenu()" class="w-full text-left text-slate-200 px-3 py-2 rounded-md font-medium hover:bg-slate-700 flex items-center space-x-2">
+                <i class="fa-solid fa-book-bookmark w-5 text-purple-400"></i><span>Cheat Sheets</span>
+            </button>
+            <button onclick="switchTab('tools'); toggleMobileMenu()" class="w-full text-left text-slate-200 px-3 py-2 rounded-md font-medium hover:bg-slate-700 flex items-center space-x-2">
+                <i class="fa-solid fa-calculator w-5 text-cyan-400"></i><span>Math Tools</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT CONTAINERS -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ========================================== -->
+        <!-- 1. DASHBOARD & STUDY PLANNER VIEW          -->
+        <!-- ========================================== -->
+        <div id="tab-dashboard" class="tab-content space-y-6">
+            <!-- Header Banner -->
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-900/80 via-slate-800 to-purple-900/80 p-6 sm:p-8 border border-indigo-500/20 shadow-xl">
+                <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-white">Welcome back, Scholar! 🚀</h1>
+                        <p class="text-slate-300 mt-1 text-sm sm:text-base">Track your readiness, master high-yield topics, and aim for your target score.</p>
+                    </div>
+                    <button onclick="switchTab('practice')" class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/30 transition flex items-center space-x-2 shrink-0">
+                        <i class="fa-solid fa-play"></i><span>Start Quick Practice</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Top Metric Cards Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Est Composite Score -->
+                <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-4 flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                        <span>Est. ACT Composite</span>
+                        <i class="fa-solid fa-award text-indigo-400 text-base"></i>
+                    </div>
+                    <div class="mt-3 flex items-baseline justify-between">
+                        <span id="dash-composite-score" class="text-3xl font-extrabold text-indigo-400">28</span>
+                        <span class="text-xs text-slate-400">/ 36 Max</span>
+                    </div>
+                    <div class="w-full bg-slate-700 h-1.5 rounded-full mt-3 overflow-hidden">
+                        <div id="dash-composite-bar" class="bg-indigo-500 h-full rounded-full" style="width: 77%"></div>
+                    </div>
+                </div>
+
+                <!-- Questions Completed -->
+                <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-4 flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                        <span>Questions Done</span>
+                        <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+                    </div>
+                    <div class="mt-3 flex items-baseline justify-between">
+                        <span id="dash-questions-count" class="text-3xl font-extrabold text-emerald-400">42</span>
+                        <span id="dash-accuracy-rate" class="text-xs font-medium text-emerald-400">78% Acc</span>
+                    </div>
+                    <div class="w-full bg-slate-700 h-1.5 rounded-full mt-3 overflow-hidden">
+                        <div id="dash-questions-bar" class="bg-emerald-500 h-full rounded-full" style="width: 42%"></div>
+                    </div>
+                </div>
+
+                <!-- Flashcards Mastered -->
+                <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-4 flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                        <span>Flashcard Mastery</span>
+                        <i class="fa-solid fa-clone text-amber-400 text-base"></i>
+                    </div>
+                    <div class="mt-3 flex items-baseline justify-between">
+                        <span id="dash-cards-mastered" class="text-3xl font-extrabold text-amber-400">12</span>
+                        <span id="dash-cards-total" class="text-xs text-slate-400">/ 32 Cards</span>
+                    </div>
+                    <div class="w-full bg-slate-700 h-1.5 rounded-full mt-3 overflow-hidden">
+                        <div id="dash-cards-bar" class="bg-amber-500 h-full rounded-full" style="width: 37%"></div>
+                    </div>
+                </div>
+
+                <!-- Days to Test -->
+                <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-4 flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                        <span>Target Goal</span>
+                        <i class="fa-solid fa-bullseye text-purple-400 text-base"></i>
+                    </div>
+                    <div class="mt-3 flex items-baseline justify-between">
+                        <span id="dash-target-score" class="text-3xl font-extrabold text-purple-400">32</span>
+                        <button onclick="promptSetTarget()" class="text-xs text-purple-300 underline hover:text-purple-200">Set Target</button>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-3 truncate">Gap to Target: <span id="dash-score-gap" class="text-slate-200 font-bold">+4 pts</span></p>
+                </div>
+            </div>
+
+            <!-- Subject Breakdown & Score Matrix Chart -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Subject Cards Grid (2 Cols) -->
+                <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- English Subject Card -->
+                    <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-5 hover:border-indigo-500/50 transition">
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="bg-indigo-500/20 text-indigo-400 p-2.5 rounded-lg">
+                                    <i class="fa-solid fa-pen-nib"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">English</h3>
+                                    <p class="text-xs text-slate-400">Grammar & Rhetoric</p>
+                                </div>
+                            </div>
+                            <span id="dash-score-english" class="text-2xl font-black text-indigo-400">29</span>
+                        </div>
+                        <div class="space-y-1.5 text-xs text-slate-300">
+                            <div class="flex justify-between"><span>Questions Solved:</span><span id="dash-english-q" class="font-bold">12</span></div>
+                            <div class="flex justify-between"><span>Accuracy:</span><span id="dash-english-acc" class="font-bold text-emerald-400">83%</span></div>
+                        </div>
+                        <button onclick="startSubjectPractice('English')" class="w-full mt-4 bg-slate-700/70 hover:bg-indigo-600 hover:text-white text-indigo-300 text-xs font-semibold py-2 rounded-lg transition">
+                            Practice English Questions
+                        </button>
+                    </div>
+
+                    <!-- Math Subject Card -->
+                    <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-5 hover:border-cyan-500/50 transition">
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="bg-cyan-500/20 text-cyan-400 p-2.5 rounded-lg">
+                                    <i class="fa-solid fa-calculator"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Mathematics</h3>
+                                    <p class="text-xs text-slate-400">Algebra, Geometry, Trig</p>
+                                </div>
+                            </div>
+                            <span id="dash-score-math" class="text-2xl font-black text-cyan-400">27</span>
+                        </div>
+                        <div class="space-y-1.5 text-xs text-slate-300">
+                            <div class="flex justify-between"><span>Questions Solved:</span><span id="dash-math-q" class="font-bold">15</span></div>
+                            <div class="flex justify-between"><span>Accuracy:</span><span id="dash-math-acc" class="font-bold text-emerald-400">73%</span></div>
+                        </div>
+                        <button onclick="startSubjectPractice('Math')" class="w-full mt-4 bg-slate-700/70 hover:bg-cyan-600 hover:text-white text-cyan-300 text-xs font-semibold py-2 rounded-lg transition">
+                            Practice Math Questions
+                        </button>
+                    </div>
+
+                    <!-- Reading Subject Card -->
+                    <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-5 hover:border-emerald-500/50 transition">
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="bg-emerald-500/20 text-emerald-400 p-2.5 rounded-lg">
+                                    <i class="fa-solid fa-book-open"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Reading</h3>
+                                    <p class="text-xs text-slate-400">Comprehension & Logic</p>
+                                </div>
+                            </div>
+                            <span id="dash-score-reading" class="text-2xl font-black text-emerald-400">28</span>
+                        </div>
+                        <div class="space-y-1.5 text-xs text-slate-300">
+                            <div class="flex justify-between"><span>Questions Solved:</span><span id="dash-reading-q" class="font-bold">8</span></div>
+                            <div class="flex justify-between"><span>Accuracy:</span><span id="dash-reading-acc" class="font-bold text-emerald-400">75%</span></div>
+                        </div>
+                        <button onclick="startSubjectPractice('Reading')" class="w-full mt-4 bg-slate-700/70 hover:bg-emerald-600 hover:text-white text-emerald-300 text-xs font-semibold py-2 rounded-lg transition">
+                            Practice Reading Passages
+                        </button>
+                    </div>
+
+                    <!-- Science Subject Card -->
+                    <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-5 hover:border-purple-500/50 transition">
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="bg-purple-500/20 text-purple-400 p-2.5 rounded-lg">
+                                    <i class="fa-solid fa-flask"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Science</h3>
+                                    <p class="text-xs text-slate-400">Data, Charts & Experiments</p>
+                                </div>
+                            </div>
+                            <span id="dash-score-science" class="text-2xl font-black text-purple-400">27</span>
+                        </div>
+                        <div class="space-y-1.5 text-xs text-slate-300">
+                            <div class="flex justify-between"><span>Questions Solved:</span><span id="dash-science-q" class="font-bold">7</span></div>
+                            <div class="flex justify-between"><span>Accuracy:</span><span id="dash-science-acc" class="font-bold text-emerald-400">71%</span></div>
+                        </div>
+                        <button onclick="startSubjectPractice('Science')" class="w-full mt-4 bg-slate-700/70 hover:bg-purple-600 hover:text-white text-purple-300 text-xs font-semibold py-2 rounded-lg transition">
+                            Practice Science Passages
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Subject Readiness Chart -->
+                <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-5 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-white mb-1 flex items-center justify-between">
+                            <span>Score Skill Radar</span>
+                            <i class="fa-solid fa-chart-pie text-slate-400 text-sm"></i>
+                        </h3>
+                        <p class="text-xs text-slate-400 mb-4">Estimated scale score distribution per subject.</p>
+                        <div class="relative w-full h-56 flex items-center justify-center">
+                            <canvas id="scoreRadarChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-700 text-xs text-slate-400 flex items-center justify-between">
+                        <span>Overall Skill Index:</span>
+                        <span class="text-indigo-400 font-bold">Strong (78%)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommended High-Yield Quick Actions -->
+            <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-6">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center space-x-2">
+                    <i class="fa-solid fa-bolt text-amber-400"></i>
+                    <span>Recommended Daily High-Yield Modules</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 rounded-lg bg-slate-900/60 border border-slate-700/80 flex flex-col justify-between">
+                        <div>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 uppercase">English Strategy</span>
+                            <h4 class="font-bold text-slate-200 mt-2 text-sm">Punctuation Rules & Semicolons</h4>
+                            <p class="text-xs text-slate-400 mt-1">Master independent clauses and comma splices. Appears on ~15% of English test questions.</p>
+                        </div>
+                        <button onclick="openCheatSheetCategory('English')" class="mt-4 text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center space-x-1">
+                            <span>Read English Guide</span><i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </button>
+                    </div>
+
+                    <div class="p-4 rounded-lg bg-slate-900/60 border border-slate-700/80 flex flex-col justify-between">
+                        <div>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/20 text-cyan-300 uppercase">Math Formula</span>
+                            <h4 class="font-bold text-slate-200 mt-2 text-sm">SOH CAH TOA & Unit Circle</h4>
+                            <p class="text-xs text-slate-400 mt-1">Review right triangle trigonometry and sine/cosine graph transformations.</p>
+                        </div>
+                        <button onclick="switchTab('flashcards')" class="mt-4 text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center space-x-1">
+                            <span>Review Math Flashcards</span><i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </button>
+                    </div>
+
+                    <div class="p-4 rounded-lg bg-slate-900/60 border border-slate-700/80 flex flex-col justify-between">
+                        <div>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 uppercase">Science Skill</span>
+                            <h4 class="font-bold text-slate-200 mt-2 text-sm">Data Interpretation & Graphs</h4>
+                            <p class="text-xs text-slate-400 mt-1">Practice identifying direct/inverse trends and extrapolating data lines quickly.</p>
+                        </div>
+                        <button onclick="startSubjectPractice('Science')" class="mt-4 text-xs font-semibold text-purple-400 hover:text-purple-300 flex items-center space-x-1">
+                            <span>Start Science Passage</span><i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 2. PRACTICE ENGINE VIEW                    -->
+        <!-- ========================================== -->
+        <div id="tab-practice" class="tab-content hidden space-y-6">
+            <!-- Practice Control Header Bar -->
+            <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Subject Filter:</label>
+                    <select id="practice-subject-select" onchange="filterPracticeQuestions()" class="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="All">All Subjects (30 Questions)</option>
+                        <option value="English">English Grammar (8 Questions)</option>
+                        <option value="Math">Mathematics (8 Questions)</option>
+                        <option value="Reading">Reading Passages (7 Questions)</option>
+                        <option value="Science">Science Reasoning (7 Questions)</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <!-- Timer Display -->
+                    <div class="flex items-center space-x-2 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg text-sm font-mono text-indigo-400">
+                        <i class="fa-regular fa-clock text-xs"></i>
+                        <span id="practice-timer">00:00</span>
+                    </div>
+                    <button onclick="toggleTimer()" id="btn-timer-toggle" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg font-medium transition">
+                        Pause Timer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question Card Area -->
+            <div id="practice-card-container" class="bg-slate-800/80 border border-slate-700 rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl relative">
+                <!-- Top Question Metadata -->
+                <div class="flex items-center justify-between border-b border-slate-700/80 pb-4">
+                    <div class="flex items-center space-x-3">
+                        <span id="q-subject-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                            ENGLISH
+                        </span>
+                        <span id="q-topic-badge" class="text-xs text-slate-400 font-medium">
+                            Punctuation & Sentence Structure
+                        </span>
+                    </div>
+                    <span id="q-progress-counter" class="text-xs font-semibold text-slate-400">
+                        Question 1 of 8
+                    </span>
+                </div>
+
+                <!-- Passage Text Box (If applicable) -->
+                <div id="q-passage-box" class="hidden bg-slate-900/90 border border-slate-700 rounded-xl p-5 text-sm text-slate-300 leading-relaxed max-h-60 overflow-y-auto font-serif">
+                    <p id="q-passage-text">Loading passage text...</p>
+                </div>
+
+                <!-- Question Prompt -->
+                <div class="space-y-2">
+                    <h2 id="q-prompt-text" class="text-lg sm:text-xl font-semibold text-slate-100 leading-snug">
+                        Loading question text...
+                    </h2>
+                </div>
+
+                <!-- Answer Choices List -->
+                <div id="q-options-container" class="space-y-3 pt-2">
+                    <!-- Dynamic Answer Buttons injected here -->
+                </div>
+
+                <!-- Scratchpad & Hint Toggle Buttons -->
+                <div class="flex items-center justify-between pt-4 border-t border-slate-700/80">
+                    <button onclick="toggleHint()" class="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center space-x-1.5">
+                        <i class="fa-regular fa-lightbulb"></i><span>Show Hint</span>
+                    </button>
+                    <button onclick="switchTab('tools')" class="text-xs text-cyan-400 hover:text-cyan-300 font-semibold flex items-center space-x-1.5">
+                        <i class="fa-solid fa-pen-ruler"></i><span>Open Scratchpad / Calculator</span>
+                    </button>
+                </div>
+
+                <!-- Hint Drawer -->
+                <div id="q-hint-box" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-xs text-amber-200 space-y-1">
+                    <div class="font-bold flex items-center space-x-1"><i class="fa-solid fa-lightbulb"></i><span>Strategy Hint:</span></div>
+                    <p id="q-hint-text">Hint text will appear here.</p>
+                </div>
+
+                <!-- Explanation Drawer -->
+                <div id="q-explanation-box" class="hidden bg-slate-900/90 border border-slate-700 rounded-xl p-5 space-y-3">
+                    <div class="flex items-center space-x-2">
+                        <span id="q-explanation-badge" class="px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400">Correct!</span>
+                        <h4 class="font-bold text-white text-sm">Detailed Explanation</h4>
+                    </div>
+                    <p id="q-explanation-text" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        Explanation details...
+                    </p>
+                </div>
+
+                <!-- Bottom Navigation & Next Buttons -->
+                <div class="flex items-center justify-between pt-2">
+                    <button onclick="prevQuestion()" id="btn-prev-q" class="bg-slate-700 hover:bg-slate-600 disabled:opacity-40 disabled:hover:bg-slate-700 text-slate-200 text-xs font-semibold px-4 py-2.5 rounded-xl transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-chevron-left"></i><span>Previous</span>
+                    </button>
+
+                    <button onclick="nextQuestion()" id="btn-next-q" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-semibold px-5 py-2.5 rounded-xl transition shadow-lg shadow-indigo-500/20 flex items-center space-x-1.5">
+                        <span>Next Question</span><i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 3. FLASHCARDS VIEW                         -->
+        <!-- ========================================== -->
+        <div id="tab-flashcards" class="tab-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-white">Interactive ACT Flashcards</h1>
+                    <p class="text-xs sm:text-sm text-slate-400">Master essential formulas, rules, vocabulary, and concepts.</p>
+                </div>
+
+                <!-- Filter Controls -->
+                <div class="flex items-center space-x-2">
+                    <select id="flashcard-subject-filter" onchange="filterFlashcards()" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-2 outline-none">
+                        <option value="All">All Subjects (32 Cards)</option>
+                        <option value="English">English Rules (8)</option>
+                        <option value="Math">Math Formulas (8)</option>
+                        <option value="Reading">Reading Terms (8)</option>
+                        <option value="Science">Science Concepts (8)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Flashcard Display Box -->
+            <div class="max-w-xl mx-auto space-y-6">
+                <div id="flashcard-card" onclick="flipFlashcard()" class="flip-card w-full h-80 cursor-pointer">
+                    <div class="flip-card-inner border border-slate-700 rounded-2xl bg-slate-800 shadow-2xl p-6 flex flex-col justify-between">
+                        <!-- Front View -->
+                        <div class="flip-card-front flex flex-col justify-between p-6 bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700/80">
+                            <div class="flex items-center justify-between">
+                                <span id="fc-subject" class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-indigo-500/20 text-indigo-300">Subject</span>
+                                <span class="text-xs text-slate-500 flex items-center space-x-1"><i class="fa-solid fa-rotate"></i><span>Click to Flip</span></span>
+                            </div>
+                            <div class="my-auto px-4">
+                                <h3 id="fc-front-text" class="text-xl sm:text-2xl font-bold text-white leading-snug">Card Question / Front Text</h3>
+                                <p id="fc-category-subtitle" class="text-xs text-slate-400 mt-2">Category Subtitle</p>
+                            </div>
+                            <div class="text-[11px] text-slate-400">Tap card to reveal formula or explanation</div>
+                        </div>
+
+                        <!-- Back View -->
+                        <div class="flip-card-back flex flex-col justify-between p-6 bg-gradient-to-b from-slate-900 to-slate-800 border border-indigo-500/40 text-left">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300">Answer & Explanation</span>
+                                <span class="text-xs text-slate-500 flex items-center space-x-1"><i class="fa-solid fa-rotate"></i><span>Flip Back</span></span>
+                            </div>
+                            <div class="my-auto space-y-2">
+                                <p id="fc-back-text" class="text-sm sm:text-base text-slate-200 leading-relaxed font-medium">Answer text details...</p>
+                                <p id="fc-example-text" class="text-xs text-indigo-300 italic bg-indigo-950/40 p-2.5 rounded-lg border border-indigo-800/30">Example detail...</p>
+                            </div>
+                            <div class="text-[11px] text-slate-400">Rate your mastery below</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flashcard Controls & Mastery Rating Buttons -->
+                <div class="flex items-center justify-between gap-3 bg-slate-800/80 border border-slate-700 rounded-xl p-3">
+                    <button onclick="prevFlashcard()" class="p-2.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition">
+                        <i class="fa-solid fa-chevron-left text-base"></i>
+                    </button>
+
+                    <div class="flex items-center space-x-3">
+                        <button onclick="markFlashcardMastery(false)" class="px-3.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-semibold transition flex items-center space-x-1">
+                            <i class="fa-solid fa-xmark"></i><span>Needs Practice</span>
+                        </button>
+                        <span id="fc-counter" class="text-xs font-bold text-slate-400">1 / 32</span>
+                        <button onclick="markFlashcardMastery(true)" class="px-3.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition flex items-center space-x-1">
+                            <i class="fa-solid fa-check"></i><span>Mastered</span>
+                        </button>
+                    </div>
+
+                    <button onclick="nextFlashcard()" class="p-2.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition">
+                        <i class="fa-solid fa-chevron-right text-base"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 4. CHEAT SHEETS VIEW                       -->
+        <!-- ========================================== -->
+        <div id="tab-cheatsheets" class="tab-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-white">High-Yield ACT Reference Cheat Sheets</h1>
+                    <p class="text-xs sm:text-sm text-slate-400">Quick guides for English rules, Math formulas, Reading strategies & Science graphs.</p>
+                </div>
+
+                <!-- Category Selector -->
+                <div class="flex items-center space-x-2">
+                    <button onclick="showCheatSheetCategory('English')" id="cs-btn-English" class="cs-tab-btn bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">English</button>
+                    <button onclick="showCheatSheetCategory('Math')" id="cs-btn-Math" class="cs-tab-btn bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3 py-1.5 rounded-lg transition">Math</button>
+                    <button onclick="showCheatSheetCategory('Reading')" id="cs-btn-Reading" class="cs-tab-btn bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3 py-1.5 rounded-lg transition">Reading</button>
+                    <button onclick="showCheatSheetCategory('Science')" id="cs-btn-Science" class="cs-tab-btn bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3 py-1.5 rounded-lg transition">Science</button>
+                </div>
+            </div>
+
+            <!-- Content Area for Cheat Sheets -->
+            <div id="cheatsheet-content-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Dynamic Cheat Cards inserted here -->
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 5. MATH SCRATCHPAD & CALCULATOR TOOLS      -->
+        <!-- ========================================== -->
+        <div id="tab-tools" class="tab-content hidden space-y-6">
+            <div>
+                <h1 class="text-2xl font-bold text-white">Interactive ACT Math Tools</h1>
+                <p class="text-xs sm:text-sm text-slate-400">Canvas scratchpad for geometry and built-in scientific calculator.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Scratchpad Canvas (2 Cols) -->
+                <div class="lg:col-span-2 bg-slate-800/80 border border-slate-700 rounded-xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-white text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-pen-line text-indigo-400"></i><span>Problem Scratchpad</span>
+                        </h3>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="setCanvasColor('#38bdf8')" class="w-6 h-6 rounded-full bg-sky-400 border border-white/20"></button>
+                            <button onclick="setCanvasColor('#f43f5e')" class="w-6 h-6 rounded-full bg-rose-500 border border-white/20"></button>
+                            <button onclick="setCanvasColor('#a855f7')" class="w-6 h-6 rounded-full bg-purple-500 border border-white/20"></button>
+                            <button onclick="setCanvasColor('#ffffff')" class="w-6 h-6 rounded-full bg-white border border-white/20"></button>
+                            <button onclick="clearCanvas()" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1 rounded-lg ml-2">Clear</button>
+                        </div>
+                    </div>
+                    <div class="border border-slate-700 rounded-xl overflow-hidden bg-slate-950">
+                        <canvas id="scratchpadCanvas" width="700" height="400" class="w-full h-80 cursor-crosshair touch-none"></canvas>
+                    </div>
+                </div>
+
+                <!-- Scientific Calculator -->
+                <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-5 space-y-4">
+                    <h3 class="font-bold text-white text-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-calculator text-cyan-400"></i><span>Scientific Calculator</span>
+                    </h3>
+                    <div class="bg-slate-950 border border-slate-700 rounded-xl p-4 text-right">
+                        <div id="calc-expression" class="text-xs text-slate-500 h-4 font-mono"></div>
+                        <div id="calc-display" class="text-2xl font-bold font-mono text-emerald-400 truncate mt-1">0</div>
+                    </div>
+
+                    <!-- Calculator Buttons Grid -->
+                    <div class="grid grid-cols-4 gap-2 text-xs font-bold">
+                        <button onclick="calcClear()" class="p-3 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/30">C</button>
+                        <button onclick="calcOp('(')" class="p-3 rounded-lg bg-slate-700 text-slate-200 hover:bg-slate-600">(</button>
+                        <button onclick="calcOp(')')" class="p-3 rounded-lg bg-slate-700 text-slate-200 hover:bg-slate-600">)</button>
+                        <button onclick="calcOp('/')" class="p-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-500">÷</button>
+
+                        <button onclick="calcFunc('sin')" class="p-3 rounded-lg bg-slate-700/80 text-cyan-300 hover:bg-slate-700">sin</button>
+                        <button onclick="calcFunc('cos')" class="p-3 rounded-lg bg-slate-700/80 text-cyan-300 hover:bg-slate-700">cos</button>
+                        <button onclick="calcFunc('tan')" class="p-3 rounded-lg bg-slate-700/80 text-cyan-300 hover:bg-slate-700">tan</button>
+                        <button onclick="calcOp('*')" class="p-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-500">×</button>
+
+                        <button onclick="calcNum('7')" class="p-3 rounded-lg bg-slate-900 text-slate-200 hover:bg-slate-700">7</button>
+                        <button onclick="calcNum('8')" class="p-3 rounded-lg bg-slate-900 text-slate-200 hover:bg-slate-700">8</button>
+                        <button onclick="calcNum('9')" class="p-3 rounded-lg bg-slate-900 text-slate-200 hover:bg-slate-700">9</button>
+                        <button onclick="calcOp('-')" class="p-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-500">-</button>
+
+                        <button onclick="calcNum('4')" class="p-3 rounded-lg bg-slate-900 text-slate-200 hover:bg-slate-700">4</button>
+                        <button onclick="calcNum('5')" class="p-3 rounded-lg bg-slate-900 text-slate-200 hover:bg-slate-700">5</button>
+                        <button onclick="calcNum('6')" class="p-3 rounded-lg bg-slate-900 text-slate-200 hover:bg-slate-700">6</button>
+                        <button onclick="calcOp('+')" class="p-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-500">+</button>
+
+                        <button onclick="calcNum('1')" class="p-3 rounded-lg bg-slate-900 text-slate-200 hover:bg-slate-700">1</button>
+                        <button onclick="calcNum('2')" class="p-3 rounded-lg bg-slate-900 text-slate-200 hover:bg-slate-700">2</button>
+                        <button onclick="calcNum('3')" class="p-3 rounded-lg bg-slate-900 text-slate-200 hover:bg-slate-700">3</button>
+                        <button onclick="calcFunc('sqrt')" class="p-3 rounded-lg bg-slate-700 text-cyan-300 hover:bg-slate-600">√</button>
+
+                        <button onclick="calcNum('0')" class="p-3 rounded-lg bg-slate-900 text-slate-200 hover:bg-slate-700 col-span-2">0</button>
+                        <button onclick="calcNum('.')" class="p-3 rounded-lg bg-slate-900 text-slate-200 hover:bg-slate-700">.</button>
+                        <button onclick="calcEquals()" class="p-3 rounded-lg bg-emerald-500 text-white hover:bg-emerald-400">=</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 border-t border-slate-800 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-graduation-cap text-indigo-400 text-base"></i>
+                <span class="font-bold text-slate-400">ACT Prep Pro Suite</span>
+            </div>
+            <p>Designed for self-paced ACT standardized test preparation.</p>
+        </div>
+    </footer>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT APPLICATION LOGIC & DATABASES   -->
+    <!-- ========================================== -->
+    <script>
+        /* ---------------------------------------------------- */
+        /* GLOBAL APP STATE & LOCALSTORAGE PERSISTENCE         */
+        /* ---------------------------------------------------- */
+        let state = {
+            targetScore: 32,
+            streakDays: 5,
+            stats: {
+                English: { solved: 12, correct: 10, total: 8 },
+                Math: { solved: 15, correct: 11, total: 8 },
+                Reading: { solved: 8, correct: 6, total: 7 },
+                Science: { solved: 7, correct: 5, total: 7 }
+            },
+            flashcardMastery: {},
+            activeTab: 'dashboard'
+        };
+
+        function loadSavedState() {
+            const saved = localStorage.getItem('act_prep_state_v2');
+            if (saved) {
+                try {
+                    state = JSON.parse(saved);
+                } catch(e) {
+                    console.error("Failed to parse saved state", e);
+                }
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem('act_prep_state_v2', JSON.stringify(state));
+            updateDashboardUI();
+        }
+
+        function confirmResetData() {
+            if (confirm("Reset all stored ACT progress and flashcard mastery data?")) {
+                localStorage.removeItem('act_prep_state_v2');
+                location.reload();
+            }
+        }
+
+        /* ---------------------------------------------------- */
+        /* QUESTION DATABASE (30 EXPANDED QUESTIONS)            */
+        /* ---------------------------------------------------- */
+        const questionsDb = [
+            // ENGLISH (8 Questions)
+            {
+                id: "e1",
+                subject: "English",
+                topic: "Punctuation & Clauses",
+                prompt: "Choose the option that correctly links the two independent clauses: 'The ACT exam requires endurance ___ preparing strategy and pacing is crucial.'",
+                passage: null,
+                options: [
+                    "endurance, preparing strategy",
+                    "endurance; preparing strategy",
+                    "endurance preparing strategy",
+                    "endurance, and preparing strategy:"
+                ],
+                correct: 1,
+                hint: "Two independent clauses must be joined by a semicolon or a comma + coordinating conjunction (FANBOYS).",
+                explanation: "Option B is correct because a semicolon improperly joins two complete independent clauses without needing a conjunction."
+            },
+            {
+                id: "e2",
+                subject: "English",
+                topic: "Subject-Verb Agreement",
+                prompt: "Which choice fixes the agreement error? 'The collection of rare geometric manuscripts and old algebra texts _____ donated to the university library.'",
+                passage: null,
+                options: ["were", "was", "have been", "are"],
+                correct: 1,
+                hint: "Find the true subject. The subject is 'collection' (singular), not 'manuscripts' or 'texts'.",
+                explanation: "The subject 'collection' is singular, so the singular verb 'was' is required."
+            },
+            {
+                id: "e3",
+                subject: "English",
+                topic: "Conciseness & Redundancy",
+                prompt: "Which revision eliminates unnecessary redundancy? 'The scientist conducted an investigation to discover new findings that were previously unknown before.'",
+                passage: null,
+                options: [
+                    "conducted an investigation to discover new findings that were previously unknown before.",
+                    "conducted an investigation to discover new findings.",
+                    "investigated to discover brand new findings that were unknown before.",
+                    "investigated to find out discoveries previously unknown in history."
+                ],
+                correct: 1,
+                hint: "ACT prefers concise, direct statements. 'New findings' already implies they were previously unknown.",
+                explanation: "Option B removes redundant words like 'previously unknown before'."
+            },
+            {
+                id: "e4",
+                subject: "English",
+                topic: "Parallel Structure",
+                prompt: "Choose the correct parallel phrasing: 'During her revision, Maya focused on organizing paragraphs, refining tone, and _____' ",
+                passage: null,
+                options: [
+                    "to correct punctuation errors.",
+                    "correcting punctuation errors.",
+                    "punctuation errors were corrected.",
+                    "she corrected punctuation errors."
+                ],
+                correct: 1,
+                hint: "Maintain matching verb forms in lists (organizing, refining, ...).",
+                explanation: "'correcting' maintains parallel gerund construction with 'organizing' and 'refining'."
+            },
+            {
+                id: "e5",
+                subject: "English",
+                topic: "Pronoun Antecedent Agreement",
+                prompt: "Select the grammatically correct pronoun: 'Each student in the honors seminar must submit _____ research poster by Friday.'",
+                passage: null,
+                options: ["their", "his or her", "they're", "its"],
+                correct: 1,
+                hint: "'Each' is a singular indefinite pronoun requiring a singular possessive pronoun.",
+                explanation: "'His or her' correctly agrees with the singular antecedent 'Each student'."
+            },
+            {
+                id: "e6",
+                subject: "English",
+                topic: "Transitions & Logic",
+                prompt: "Which transition best fits? 'Solar energy generation has become significantly cheaper. ______, utility companies are increasing investments in photovoltaic farms.'",
+                passage: null,
+                options: ["Consequently", "However", "In contrast", "Nevertheless"],
+                correct: 0,
+                hint: "Determine the relationship between the sentences: cause and effect.",
+                explanation: "'Consequently' shows the logical result of solar energy becoming cheaper."
+            },
+            {
+                id: "e7",
+                subject: "English",
+                topic: "Apostrophe Rules",
+                prompt: "Which word correctly fills the blank? 'The _____ lockers were moved into the main hallway during renovation.'",
+                passage: null,
+                options: ["athlete's", "athletes'", "athletes", "athlete"],
+                correct: 1,
+                hint: "The lockers belong to multiple athletes.",
+                explanation: "Plural possessive for regular nouns ending in 's' places the apostrophe after the 's' (athletes')."
+            },
+            {
+                id: "e8",
+                subject: "English",
+                topic: "Who vs. Whom",
+                prompt: "Select the correct choice: 'The committee nominated Dr. Aris, _____ had published pioneering studies on quantum computing.'",
+                passage: null,
+                options: ["whom", "who", "which", "whose"],
+                correct: 1,
+                hint: "Replace with 'he/she' vs 'him/her'. 'He had published' -> use 'who'.",
+                explanation: "'Who' functions as the subject of the clause 'who had published'."
+            },
+
+            // MATHEMATICS (8 Questions)
+            {
+                id: "m1",
+                subject: "Math",
+                topic: "Algebra & Equations",
+                prompt: "If 3x + 7 = 22, what is the value of 6x - 4?",
+                passage: null,
+                options: ["26", "30", "22", "34"],
+                correct: 0,
+                hint: "Solve for x first: 3x = 15 -> x = 5. Then plug x into 6x - 4.",
+                explanation: "3x = 15 => x = 5. Then 6(5) - 4 = 30 - 4 = 26."
+            },
+            {
+                id: "m2",
+                subject: "Math",
+                topic: "Geometry & Pythagorean Theorem",
+                prompt: "A right triangle has a leg of length 8 cm and a hypotenuse of length 17 cm. What is the length of the other leg in cm?",
+                passage: null,
+                options: ["12 cm", "15 cm", "13 cm", "14 cm"],
+                correct: 1,
+                hint: "Use a² + b² = c² -> 8² + b² = 17².",
+                explanation: "64 + b² = 289 => b² = 225 => b = 15."
+            },
+            {
+                id: "m3",
+                subject: "Math",
+                topic: "Trigonometry",
+                prompt: "In a right triangle with angle θ, if sin(θ) = 3/5, what is cos(θ)?",
+                passage: null,
+                options: ["4/5", "3/4", "5/3", "4/3"],
+                correct: 0,
+                hint: "Recall the 3-4-5 right triangle ratio, where opposite=3 and hypotenuse=5.",
+                explanation: "Adjacent leg = √(5² - 3²) = 4. Therefore cos(θ) = adjacent/hypotenuse = 4/5."
+            },
+            {
+                id: "m4",
+                subject: "Math",
+                topic: "Coordinate Geometry",
+                prompt: "What is the slope of the line passing through points (-2, 5) and (4, -7)?",
+                passage: null,
+                options: ["-2", "2", "-1/2", "1/2"],
+                correct: 0,
+                hint: "Slope m = (y₂ - y₁) / (x₂ - x₁).",
+                explanation: "m = (-7 - 5) / (4 - (-2)) = -12 / 6 = -2."
+            },
+            {
+                id: "m5",
+                subject: "Math",
+                topic: "Functions & Logs",
+                prompt: "Evaluate log₂(32) + log₃(27).",
+                passage: null,
+                options: ["8", "7", "5", "9"],
+                correct: 0,
+                hint: "2? = 32 and 3? = 27.",
+                explanation: "log₂(32) = 5 (since 2⁵=32) and log₃(27) = 3 (since 3³=27). 5 + 3 = 8."
+            },
+            {
+                id: "m6",
+                subject: "Math",
+                topic: "Probability & Statistics",
+                prompt: "A bag contains 4 red marbles, 6 blue marbles, and 5 green marbles. What is the probability of drawing a red or green marble?",
+                passage: null,
+                options: ["3/5", "4/15", "1/3", "2/5"],
+                correct: 0,
+                hint: "Total marbles = 4 + 6 + 5 = 15. Target marbles = 4 + 5 = 9.",
+                explanation: "Probability = 9 / 15 = 3/5."
+            },
+            {
+                id: "m7",
+                subject: "Math",
+                topic: "Complex Numbers",
+                prompt: "What is the product of (3 + 2i) and (3 - 2i), where i = √(-1)?",
+                passage: null,
+                options: ["13", "5", "9 - 4i", "13 + 4i"],
+                correct: 0,
+                hint: "(a + bi)(a - bi) = a² + b².",
+                explanation: "3² - (2i)² = 9 - (4 * -1) = 9 + 4 = 13."
+            },
+            {
+                id: "m8",
+                subject: "Math",
+                topic: "Circles & Equations",
+                prompt: "What is the center and radius of the circle with equation (x - 3)² + (y + 4)² = 36?",
+                passage: null,
+                options: [
+                    "Center (3, -4), Radius 6",
+                    "Center (-3, 4), Radius 6",
+                    "Center (3, -4), Radius 36",
+                    "Center (-3, 4), Radius 36"
+                ],
+                correct: 0,
+                hint: "Standard form: (x - h)² + (y - k)² = r².",
+                explanation: "h = 3, k = -4, r = √36 = 6."
+            },
+
+            // READING (7 Questions)
+            {
+                id: "r1",
+                subject: "Reading",
+                topic: "Literary Narrative",
+                prompt: "Based on the passage, the narrator's primary attitude toward the old clock tower can best be described as:",
+                passage: "The old town clock tower stood at the center of our square like an ancient sentinel. Though its iron gears ground heavily each hour, its steady chime anchored our mornings and comforted the neighborhood through silent winter nights.",
+                options: [
+                    "nostalgic affection and reverence.",
+                    "indifference to its state of disrepair.",
+                    "frustration at its noisy gears.",
+                    "skepticism about its durability."
+                ],
+                correct: 0,
+                hint: "Notice positive words like 'sentinel', 'anchored', and 'comforted'.",
+                explanation: "Words like 'anchored' and 'comforted' reflect deep affection and nostalgia."
+            },
+            {
+                id: "r2",
+                subject: "Reading",
+                topic: "Main Idea & Author's Purpose",
+                prompt: "The main purpose of the passage is to:",
+                passage: "Recent excavations in Anatolia have yielded obsidian tools dating back over 10,000 years. Chemical analysis reveals these minerals traveled over 400 miles from volcanic quarries, proving that complex trade networks existed far earlier than traditional archeological timelines suggested.",
+                options: [
+                    "demonstrate that trade networks existed earlier than previously believed.",
+                    "explain how obsidian tools were manufactured in Anatolia.",
+                    "argue that volcanic quarries were the primary source of early wealth.",
+                    "detail the precise chemical composition of ancient obsidian."
+                ],
+                correct: 0,
+                hint: "Focus on the conclusion statement introduced by 'proving that...'.",
+                explanation: "The passage directly concludes that trade networks existed far earlier than previously believed."
+            },
+            {
+                id: "r3",
+                subject: "Reading",
+                topic: "Vocabulary in Context",
+                prompt: "As used in line 3, the word 'anchored' most nearly means:",
+                passage: "Though its iron gears ground heavily each hour, its steady chime anchored our mornings and comforted the neighborhood through silent winter nights.",
+                options: ["secured", "stabilized", "fastened", "weighed down"],
+                correct: 1,
+                hint: "Consider how a chime stabilizes or grounds a community routine.",
+                explanation: "'Stabilized' best fits the contextual sense of giving structure and comfort."
+            },
+            {
+                id: "r4",
+                subject: "Reading",
+                topic: "Inference & Logic",
+                prompt: "It can reasonably be inferred from the obsidian passage that traditional archeological timelines:",
+                passage: "Recent excavations in Anatolia have yielded obsidian tools dating back over 10,000 years. Chemical analysis reveals these minerals traveled over 400 miles from volcanic quarries, proving that complex trade networks existed far earlier than traditional archeological timelines suggested.",
+                options: [
+                    "underestimated the trade distance capabilities of early humans.",
+                    "overestimated the age of volcanic quarries.",
+                    "ignored chemical analysis techniques.",
+                    "were based entirely on Anatolian discoveries."
+                ],
+                correct: 0,
+                hint: "The text says trade networks traveled 400 miles earlier than timelines suggested.",
+                explanation: "The timeline suggested trade happened later, meaning it underestimated early human trade distance capabilities."
+            },
+            {
+                id: "r5",
+                subject: "Reading",
+                topic: "Author's Tone",
+                prompt: "The overall tone of the archeological passage is best described as:",
+                passage: "Recent excavations in Anatolia have yielded obsidian tools dating back over 10,000 years. Chemical analysis reveals these minerals traveled over 400 miles from volcanic quarries, proving that complex trade networks existed far earlier than traditional archeological timelines suggested.",
+                options: [
+                    "informative and analytical.",
+                    "critical and accusatory.",
+                    "overly emotional.",
+                    "speculative and uncertain."
+                ],
+                correct: 0,
+                hint: "Look at the objective presentation of scientific evidence and findings.",
+                explanation: "The passage presents factual evidence in an objective, informative tone."
+            },
+            {
+                id: "r6",
+                subject: "Reading",
+                topic: "Detail Retrieval",
+                prompt: "According to the text, how far did the obsidian minerals travel from volcanic quarries?",
+                passage: "Recent excavations in Anatolia have yielded obsidian tools dating back over 10,000 years. Chemical analysis reveals these minerals traveled over 400 miles from volcanic quarries, proving that complex trade networks existed far earlier than traditional archeological timelines suggested.",
+                options: ["Over 400 miles", "Exactly 10,000 miles", "Under 100 miles", "Across Anatolia only"],
+                correct: 0,
+                hint: "Locate the explicit numerical distance stated in the passage.",
+                explanation: "The text explicitly states 'traveled over 400 miles'."
+            },
+            {
+                id: "r7",
+                subject: "Reading",
+                topic: "Comparative Reading",
+                prompt: "In context, both passages deal primarily with the concept of:",
+                passage: "Passage A discusses ancient mechanical clock towers. Passage B discusses ancient trade routes discovered via obsidian tools.",
+                options: [
+                    "enduring artifacts from earlier human eras.",
+                    "modern industrial technology.",
+                    "urban architectural design.",
+                    "geological volcanic formations."
+                ],
+                correct: 0,
+                hint: "What connects clock towers and 10,000-year-old obsidian tools?",
+                explanation: "Both passages focus on enduring physical artifacts from history."
+            },
+
+            // SCIENCE (7 Questions)
+            {
+                id: "s1",
+                subject: "Science",
+                topic: "Data & Graph Interpretation",
+                prompt: "Based on Data Table 1 (Enzyme activity vs Temp: 20°C -> 15 units, 30°C -> 35 units, 40°C -> 50 units, 50°C -> 20 units), at what temperature is enzyme activity maximized?",
+                passage: "Experiment 1 measured enzyme reaction rates (units/min) across varying temperatures:\n• 20°C: 15 units\n• 30°C: 35 units\n• 40°C: 50 units\n• 50°C: 20 units",
+                options: ["40°C", "30°C", "50°C", "20°C"],
+                correct: 0,
+                hint: "Look for the highest numeric unit value in the data list.",
+                explanation: "At 40°C, the reaction rate reaches its peak value of 50 units."
+            },
+            {
+                id: "s2",
+                subject: "Science",
+                topic: "Experimental Design",
+                prompt: "In Experiment 1, what was the independent variable?",
+                passage: "Experiment 1 measured enzyme reaction rates (units/min) across varying temperatures:\n• 20°C: 15 units\n• 30°C: 35 units\n• 40°C: 50 units\n• 50°C: 20 units",
+                options: ["Temperature (°C)", "Enzyme reaction rate", "Enzyme concentration", "pH level"],
+                correct: 0,
+                hint: "The independent variable is the variable intentionally altered by researchers.",
+                explanation: "Temperature was systematically varied (20°C to 50°C)."
+            },
+            {
+                id: "s3",
+                subject: "Science",
+                topic: "Extrapolation & Trends",
+                prompt: "If the trend between 20°C and 40°C remains linear, what would be the expected activity at 25°C?",
+                passage: "Data: 20°C -> 15 units; 30°C -> 35 units; 40°C -> 50 units.",
+                options: ["25 units", "20 units", "30 units", "35 units"],
+                correct: 0,
+                hint: "Midpoint between 15 units (20°C) and 35 units (30°C).",
+                explanation: "The midpoint between 15 and 35 is (15+35)/2 = 25 units."
+            },
+            {
+                id: "s4",
+                subject: "Science",
+                topic: "Conflicting Viewpoints",
+                prompt: "Scientist 1 claims asteroid impact caused mass extinction. Scientist 2 claims volcanic eruptions caused it. Which evidence supports Scientist 2 over Scientist 1?",
+                passage: "Scientist 1: Massive iridium layer indicates single meteor impact event.\nScientist 2: Massive flood basalt lava deposits (Deccan Traps) show widespread volcanism over 500,000 years.",
+                options: [
+                    "Extensive subterranean lava fields dated to the same epoch.",
+                    "High concentration of extraterrestrial iridium in clay.",
+                    "Discovery of a major impact crater in Mexico.",
+                    "Evidence of rapid tidal waves worldwide."
+                ],
+                correct: 0,
+                hint: "Look for evidence specifically tied to volcanism and lava.",
+                explanation: "Subterranean lava fields directly support Scientist 2's volcanic hypothesis."
+            },
+            {
+                id: "s5",
+                subject: "Science",
+                topic: "Hypothesis Testing",
+                prompt: "A researcher hypothesizes that higher light intensity increases photosynthetic yield up to a saturation limit. Which plot curve supports this?",
+                passage: null,
+                options: [
+                    "A curve rising steadily and then flattening horizontally",
+                    "A line decreasing continuously from left to right",
+                    "A U-shaped parabolic curve",
+                    "A constant vertical straight line"
+                ],
+                correct: 0,
+                hint: "Increasing then leveling off = plateau curve.",
+                explanation: "A curve rising and then flattening horizontally represents saturation."
+            },
+            {
+                id: "s6",
+                subject: "Science",
+                topic: "Scientific Inference",
+                prompt: "Why does enzyme activity drop sharply at 50°C in Experiment 1?",
+                passage: "Experiment 1 measured enzyme reaction rates (units/min) across varying temperatures:\n• 20°C: 15 units\n• 30°C: 35 units\n• 40°C: 50 units\n• 50°C: 20 units",
+                options: [
+                    "High thermal energy denatures the enzyme's protein structure.",
+                    "The enzyme runs out of substrate molecules.",
+                    "The reaction freezes due to low kinetic energy.",
+                    "High temperatures convert enzymes into carbohydrates."
+                ],
+                correct: 0,
+                hint: "Heat disrupts biological protein folding.",
+                explanation: "Excess heat denatures enzymes, breaking down active binding sites."
+            },
+            {
+                id: "s7",
+                subject: "Science",
+                topic: "Data Comparison",
+                prompt: "Comparing 20°C and 50°C in Experiment 1, which statement is accurate?",
+                passage: "Data: 20°C -> 15 units; 50°C -> 20 units.",
+                options: [
+                    "Reaction rate at 50°C is 5 units higher than at 20°C.",
+                    "Reaction rate at 20°C is higher than at 50°C.",
+                    "Both temperatures produce identical reaction rates.",
+                    "Reaction rate at 50°C is double that of 20°C."
+                ],
+                correct: 0,
+                hint: "20 units - 15 units = 5 units.",
+                explanation: "20 units at 50°C minus 15 units at 20°C equals a difference of 5 units."
+            }
+        ];
+
+        /* ---------------------------------------------------- */
+        /* FLASHCARD DATABASE (32 CARDS)                        */
+        /* ---------------------------------------------------- */
+        const flashcardsDb = [
+            // English (8)
+            { subject: "English", category: "Punctuation", front: "Semicolon Rule", back: "Joins two independent clauses without a conjunction.", example: "The storm raged outside; we stayed warm indoors." },
+            { subject: "English", category: "Grammar", front: "Comma Splice", back: "An error caused by joining two independent clauses with only a comma.", example: "Incorrect: I went home, I ate lunch." },
+            { subject: "English", category: "Rhetoric", front: "FANBOYS Conjunctions", back: "For, And, Nor, But, Or, Yet, So — require a comma before them when joining two independent clauses.", example: "She studied hard, but the test was challenging." },
+            { subject: "English", category: "Punctuation", front: "Colon Rule", back: "Must follow a complete independent clause to introduce a list, quote, or explanation.", example: "He needed three items: milk, eggs, and bread." },
+            { subject: "English", category: "Grammar", front: "Subject-Verb Agreement", back: "Singular subjects take singular verbs; plural subjects take plural verbs. Ignore prepositional phrases in between.", example: "The list of items IS on the table." },
+            { subject: "English", category: "Grammar", front: "Who vs. Whom", back: "'Who' is a subject (he/she); 'Whom' is an object (him/her).", example: "Whom did you invite? / Who wrote this essay?" },
+            { subject: "English", category: "Diction", front: "Its vs. It's", back: "'Its' is possessive. 'It's' is a contraction for 'it is'.", example: "The dog wagged its tail when it's time to play." },
+            { subject: "English", category: "Strategy", front: "Conciseness Principle", back: "When choices are grammatically correct, the shortest choice is usually correct on the ACT.", example: "Avoid wordy or repetitive choices." },
+
+            // Math (8)
+            { subject: "Math", category: "Geometry", front: "Pythagorean Theorem", back: "a² + b² = c² (for right-angled triangles)", example: "3-4-5 and 5-12-13 are common triples." },
+            { subject: "Math", category: "Trigonometry", front: "SOH CAH TOA", back: "sin = Opp/Hyp, cos = Adj/Hyp, tan = Opp/Adj", example: "tan(θ) = sin(θ) / cos(θ)" },
+            { subject: "Math", category: "Algebra", front: "Quadratic Formula", back: "x = [-b ± √(b² - 4ac)] / (2a)", example: "Solves ax² + bx + c = 0" },
+            { subject: "Math", category: "Coordinate", front: "Midpoint Formula", back: "((x₁ + x₂)/2 , (y₁ + y₂)/2)", example: "Midpoint between (0,0) and (4,6) is (2,3)" },
+            { subject: "Math", category: "Geometry", front: "Area of a Circle", back: "A = πr² | Circumference C = 2πr", example: "r = 5 -> Area = 25π" },
+            { subject: "Math", category: "Algebra", front: "Logarithm Rules", back: "log_b(xy) = log_b(x) + log_b(y) | log_b(x/y) = log_b(x) - log_b(y)", example: "log₂(8) = 3 because 2³ = 8" },
+            { subject: "Math", category: "Geometry", front: "Slope Formula", back: "m = (y₂ - y₁) / (x₂ - x₁)", example: "Parallel lines have equal slopes; perpendicular lines have negative reciprocal slopes." },
+            { subject: "Math", category: "Statistics", front: "Expected Value / Mean", back: "Mean = Sum of items / Total count", example: "Average speed = Total Distance / Total Time" },
+
+            // Reading (8)
+            { subject: "Reading", category: "Pacing", front: "35-Minute Rule", back: "4 passages, 40 questions total. Allocate ~8.5 minutes per passage.", example: "Don't get stuck on one tricky detail question." },
+            { subject: "Reading", category: "Strategy", front: "Passage Types Order", back: "1. Prose Fiction 2. Social Science 3. Humanities 4. Natural Science", example: "Start with your strongest subject passage first!" },
+            { subject: "Reading", category: "Question Type", front: "Vocabulary in Context", back: "Substitute the options into the sentence; ignore primary dictionary definitions.", example: "Find context clues around the line reference." },
+            { subject: "Reading", category: "Strategy", front: "Main Idea vs. Detail", back: "Main idea covers the entire passage; detail choices are too narrow or out of scope.", example: "Watch out for choices that are true facts but not the main point." },
+            { subject: "Reading", category: "Tone", front: "Author's Stance", back: "Look for strong adjectives and tone words (enthusiastic, critical, objective).", example: "Academic science passages are almost always objective and neutral." },
+            { subject: "Reading", category: "Logic", front: "Paired Passages (3A/3B)", back: "Read Passage A, answer A questions; read Passage B, answer B questions; then answer comparison questions.", example: "Saves time and prevents mixing up viewpoints." },
+            { subject: "Reading", category: "Strategy", front: "Line Reference Trap", back: "Always read 2 lines above and 2 lines below the stated line reference.", example: "The true context is often right before or after." },
+            { subject: "Reading", category: "Elimination", front: "Extreme Language Trap", back: "Beware of absolute words like 'always', 'never', 'impossible', 'perfect'.", example: "ACT Reading correct answers use moderate language." },
+
+            // Science (8)
+            { subject: "Science", category: "Data", front: "Direct vs. Inverse", back: "Direct: Both increase together. Inverse: As one increases, the other decreases.", example: "Pressure vs. Volume in gases is inverse." },
+            { subject: "Science", category: "Experiments", front: "Independent vs. Dependent", back: "Independent = Changed by scientist (X-axis). Dependent = Measured outcome (Y-axis).", example: "Temperature (Independent) vs Reaction Speed (Dependent)" },
+            { subject: "Science", category: "Pacing", front: "35-Minute Science Rule", back: "6 passages, 40 questions. Spend ~5-6 minutes per passage.", example: "Go straight to graphs before reading full text." },
+            { subject: "Science", category: "Strategy", front: "Conflicting Viewpoints", back: "Read Scientist 1 & 2 hypotheses carefully. Look for direct points of disagreement.", example: "Compare assumptions side-by-side." },
+            { subject: "Science", category: "Data", front: "Extrapolation", back: "Extending a data trend beyond the plotted points on a graph.", example: "Follow the slope direction of the line." },
+            { subject: "Science", category: "Concepts", front: "pH Scale", back: "pH < 7 is Acidic; pH = 7 is Neutral; pH > 7 is Basic/Alkaline.", example: "Lower pH = Higher H+ concentration." },
+            { subject: "Science", category: "Concepts", front: "Density Formula", back: "Density = Mass / Volume (d = m/V)", example: "Less dense liquids float on top of denser liquids." },
+            { subject: "Science", category: "Concepts", front: "Genetics / Punnett Square", back: "Dominant alleles (A) mask Recessive alleles (a). Homozygous (AA or aa) vs Heterozygous (Aa).", example: "Aa x Aa yields a 3:1 dominant phenotype ratio." }
+        ];
+
+        /* ---------------------------------------------------- */
+        /* CHEAT SHEETS DATA                                    */
+        /* ---------------------------------------------------- */
+        const cheatSheetsDb = {
+            English: [
+                { title: "Top 5 ACT Grammar Rules", items: ["1. Independent Clauses need ; or , + FANBOYS.", "2. Singular subjects take singular verbs.", "3. Pronouns must clearly match their antecedent.", "4. Keep items in lists parallel in structure.", "5. Pick the most concise choice that is grammatically sound."] },
+                { title: "Punctuation Quick Guide", items: ["Comma (,): Separates clauses, introductory phrases, items in list.", "Semicolon (;): Connects two related independent clauses.", "Colon (:): Follows complete clause to introduce list/explanation.", "Dash (—): Sets off emphatic parenthetical thoughts."] }
+            ],
+            Math: [
+                { title: "Essential Geometry & Trig Formulas", items: ["Triangle Area = ½ * base * height", "Circle Area = πr² | Circumference = 2πr", "Sin = Opp/Hyp | Cos = Adj/Hyp | Tan = Opp/Adj", "Pythagorean Theorem: a² + b² = c²"] },
+                { title: "Algebra & Coordinate Rules", items: ["Slope m = (y₂ - y₁) / (x₂ - x₁)", "Slope-Intercept: y = mx + b", "Quadratic: x = [-b ± √(b² - 4ac)] / 2a", "Exponent Rule: x^a * x^b = x^(a+b)"] }
+            ],
+            Reading: [
+                { title: "Passage Speed & Pacing Strategy", items: ["Target ~8.5 minutes per passage.", "Skim passage in 2-3 minutes for main structure.", "Map paragraph key points in margins.", "Return to line references with 2-line buffer rule."] },
+                { title: "Answer Elimination Secrets", items: ["Eliminate choices with extreme words ('always', 'never').", "Beware of facts true in real life but not in text.", "Avoid half-right choices — half wrong is completely wrong."] }
+            ],
+            Science: [
+                { title: "Graph Reading & Extrapolation", items: ["Identify X-axis (Independent) & Y-axis (Dependent).", "Check units and scale multipliers before answering.", "Note trends: Direct (upwards slope) vs Inverse (downwards slope)."] },
+                { title: "Conflicting Viewpoints Mastery", items: ["Skim introduction for common background facts.", "Underline Scientist 1's main claim and evidence.", "Underline Scientist 2's contrasting claim."] }
+            ]
+        };
+
+        /* ---------------------------------------------------- */
+        /* TAB NAVIGATION LOGIC                                 */
+        /* ---------------------------------------------------- */
+        function switchTab(tabId) {
+            state.activeTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const activeEl = document.getElementById(`tab-${tabId}`);
+            if (activeEl) activeEl.classList.remove('hidden');
+
+            // Update Navigation Button Styles
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-indigo-400', 'bg-slate-700/60');
+                btn.classList.add('text-slate-300');
+            });
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.add('text-indigo-400', 'bg-slate-700/60');
+            }
+
+            if (tabId === 'dashboard') updateDashboardUI();
+            if (tabId === 'practice') loadPracticeQuestion();
+            if (tabId === 'flashcards') updateFlashcardUI();
+            if (tabId === 'cheatsheets') renderCheatSheets();
+            if (tabId === 'tools') initScratchpad();
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        /* ---------------------------------------------------- */
+        /* DASHBOARD LOGIC & RADAR CHART                       */
+        /* ---------------------------------------------------- */
+        let scoreChart = null;
+
+        function calculateEstimatedScores() {
+            // Converts accuracy stats into ACT Scale Scores (1-36 scale)
+            const convertToScale = (solved, correct) => {
+                if (!solved || solved === 0) return 24; // Default starting estimate
+                const pct = correct / solved;
+                return Math.min(36, Math.max(12, Math.round(12 + (pct * 24))));
+            };
+
+            const eScore = convertToScale(state.stats.English.solved, state.stats.English.correct);
+            const mScore = convertToScale(state.stats.Math.solved, state.stats.Math.correct);
+            const rScore = convertToScale(state.stats.Reading.solved, state.stats.Reading.correct);
+            const sScore = convertToScale(state.stats.Science.solved, state.stats.Science.correct);
+
+            const composite = Math.round((eScore + mScore + rScore + sScore) / 4);
+
+            return { English: eScore, Math: mScore, Reading: rScore, Science: sScore, Composite: composite };
+        }
+
+        function updateDashboardUI() {
+            const scores = calculateEstimatedScores();
+
+            document.getElementById('dash-composite-score').innerText = scores.Composite;
+            document.getElementById('nav-est-score').innerText = scores.Composite;
+            document.getElementById('dash-composite-bar').style.width = `${(scores.Composite/36)*100}%`;
+
+            // Questions count total
+            let totalSolved = 0;
+            let totalCorrect = 0;
+            Object.keys(state.stats).forEach(s => {
+                totalSolved += state.stats[s].solved;
+                totalCorrect += state.stats[s].correct;
+            });
+
+            const overallAcc = totalSolved > 0 ? Math.round((totalCorrect / totalSolved) * 100) : 0;
+            document.getElementById('dash-questions-count').innerText = totalSolved;
+            document.getElementById('dash-accuracy-rate').innerText = `${overallAcc}% Acc`;
+            document.getElementById('dash-questions-bar').style.width = `${Math.min(100, totalSolved * 2)}%`;
+
+            // Flashcards
+            const masteredCount = Object.values(state.flashcardMastery).filter(Boolean).length;
+            document.getElementById('dash-cards-mastered').innerText = masteredCount;
+            document.getElementById('dash-cards-total').innerText = `/ ${flashcardsDb.length} Cards`;
+            document.getElementById('dash-cards-bar').style.width = `${(masteredCount/flashcardsDb.length)*100}%`;
+
+            // Goal gap
+            document.getElementById('dash-target-score').innerText = state.targetScore;
+            const gap = state.targetScore - scores.Composite;
+            document.getElementById('dash-score-gap').innerText = gap <= 0 ? "Goal Reached! 🎉" : `+${gap} pts needed`;
+
+            // Subject level UI
+            ['English', 'Math', 'Reading', 'Science'].forEach(sub => {
+                const subKey = sub.toLowerCase();
+                const score = scores[sub];
+                const solved = state.stats[sub].solved;
+                const correct = state.stats[sub].correct;
+                const acc = solved > 0 ? Math.round((correct/solved)*100) : 0;
+
+                const scoreEl = document.getElementById(`dash-score-${subKey}`);
+                if (scoreEl) scoreEl.innerText = score;
+
+                const qEl = document.getElementById(`dash-${subKey}-q`);
+                if (qEl) qEl.innerText = solved;
+
+                const accEl = document.getElementById(`dash-${subKey}-acc`);
+                if (accEl) accEl.innerText = `${acc}%`;
+            });
+
+            // Radar Chart Render
+            renderRadarChart(scores);
+        }
+
+        function renderRadarChart(scores) {
+            const ctx = document.getElementById('scoreRadarChart');
+            if (!ctx) return;
+
+            if (scoreChart) scoreChart.destroy();
+
+            scoreChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['English', 'Math', 'Reading', 'Science'],
+                    datasets: [{
+                        label: 'Estimated Score',
+                        data: [scores.English, scores.Math, scores.Reading, scores.Science],
+                        backgroundColor: 'rgba(99, 102, 241, 0.25)',
+                        borderColor: '#6366f1',
+                        pointBackgroundColor: '#818cf8',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#6366f1',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 10,
+                            max: 36,
+                            ticks: { display: false, stepSize: 6 },
+                            grid: { color: '#334155' },
+                            angleLines: { color: '#334155' },
+                            pointLabels: { color: '#94a3b8', font: { size: 11, weight: 'bold' } }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function promptSetTarget() {
+            const val = prompt("Enter your Target ACT Composite Score (1 - 36):", state.targetScore);
+            if (val && !isNaN(val) && val >= 1 && val <= 36) {
+                state.targetScore = parseInt(val);
+                saveState();
+            }
+        }
+
+        /* ---------------------------------------------------- */
+        /* PRACTICE ENGINE LOGIC                                */
+        /* ---------------------------------------------------- */
+        let currentFilteredQuestions = [...questionsDb];
+        let currentQuestionIdx = 0;
+        let selectedOptionIdx = null;
+        let timerSeconds = 0;
+        let timerInterval = null;
+
+        function startSubjectPractice(subject) {
+            switchTab('practice');
+            const select = document.getElementById('practice-subject-select');
+            select.value = subject;
+            filterPracticeQuestions();
+        }
+
+        function filterPracticeQuestions() {
+            const subject = document.getElementById('practice-subject-select').value;
+            if (subject === 'All') {
+                currentFilteredQuestions = [...questionsDb];
+            } else {
+                currentFilteredQuestions = questionsDb.filter(q => q.subject === subject);
+            }
+            currentQuestionIdx = 0;
+            loadPracticeQuestion();
+        }
+
+        function loadPracticeQuestion() {
+            if (currentFilteredQuestions.length === 0) return;
+
+            const q = currentFilteredQuestions[currentQuestionIdx];
+            selectedOptionIdx = null;
+
+            document.getElementById('q-subject-badge').innerText = q.subject.toUpperCase();
+            document.getElementById('q-topic-badge').innerText = q.topic;
+            document.getElementById('q-progress-counter').innerText = `Question ${currentQuestionIdx + 1} of ${currentFilteredQuestions.length}`;
+            document.getElementById('q-prompt-text').innerText = q.prompt;
+
+            // Passage
+            const passageBox = document.getElementById('q-passage-box');
+            if (q.passage) {
+                passageBox.classList.remove('hidden');
+                document.getElementById('q-passage-text').innerText = q.passage;
+            } else {
+                passageBox.classList.add('hidden');
+            }
+
+            // Options
+            const container = document.getElementById('q-options-container');
+            container.innerHTML = '';
+            const labels = ['A', 'B', 'C', 'D'];
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-4 rounded-xl border border-slate-700 bg-slate-900/60 hover:bg-slate-700/60 transition flex items-center space-x-3 text-sm text-slate-200 group`;
+                btn.onclick = () => selectAnswer(idx);
+                btn.innerHTML = `
+                    <span class="w-7 h-7 rounded-lg border border-slate-600 group-hover:border-indigo-400 bg-slate-800 flex items-center justify-center font-bold text-xs text-slate-300 shrink-0">${labels[idx]}</span>
+                    <span>${opt}</span>
+                `;
+                container.appendChild(btn);
+            });
+
+            // Reset Drawers
+            document.getElementById('q-hint-box').classList.add('hidden');
+            document.getElementById('q-explanation-box').classList.add('hidden');
+
+            // Nav buttons
+            document.getElementById('btn-prev-q').disabled = (currentQuestionIdx === 0);
+            startTimer();
+        }
+
+        function selectAnswer(optionIdx) {
+            if (selectedOptionIdx !== null) return; // Prevent changing after selected
+            selectedOptionIdx = optionIdx;
+
+            const q = currentFilteredQuestions[currentQuestionIdx];
+            const isCorrect = (optionIdx === q.correct);
+
+            // Update stats
+            state.stats[q.subject].solved += 1;
+            if (isCorrect) state.stats[q.subject].correct += 1;
+            saveState();
+
+            // Highlight Options UI
+            const container = document.getElementById('q-options-container');
+            const buttons = container.children;
+
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true;
+                if (i === q.correct) {
+                    buttons[i].className = "w-full text-left p-4 rounded-xl border border-emerald-500/80 bg-emerald-950/40 text-emerald-200 text-sm font-medium flex items-center space-x-3";
+                } else if (i === optionIdx && !isCorrect) {
+                    buttons[i].className = "w-full text-left p-4 rounded-xl border border-rose-500/80 bg-rose-950/40 text-rose-200 text-sm font-medium flex items-center space-x-3";
+                }
+            }
+
+            // Show Explanation Drawer
+            const expBox = document.getElementById('q-explanation-box');
+            const expBadge = document.getElementById('q-explanation-badge');
+            const expText = document.getElementById('q-explanation-text');
+
+            expBox.classList.remove('hidden');
+            if (isCorrect) {
+                expBadge.innerText = "Correct! 🎉";
+                expBadge.className = "px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 } });
+                }
+            } else {
+                expBadge.innerText = "Incorrect";
+                expBadge.className = "px-2.5 py-0.5 rounded text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30";
+            }
+            expText.innerText = q.explanation;
+        }
+
+        function toggleHint() {
+            const hintBox = document.getElementById('q-hint-box');
+            const q = currentFilteredQuestions[currentQuestionIdx];
+            document.getElementById('q-hint-text').innerText = q.hint;
+            hintBox.classList.toggle('hidden');
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIdx < currentFilteredQuestions.length - 1) {
+                currentQuestionIdx++;
+                loadPracticeQuestion();
+            } else {
+                alert("You have completed all questions in this set! Returning to question 1.");
+                currentQuestionIdx = 0;
+                loadPracticeQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIdx > 0) {
+                currentQuestionIdx--;
+                loadPracticeQuestion();
+            }
+        }
+
+        // Practice Timer Logic
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+                const s = String(timerSeconds % 60).padStart(2, '0');
+                document.getElementById('practice-timer').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('btn-timer-toggle');
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                btn.innerText = "Resume Timer";
+            } else {
+                startTimer();
+                btn.innerText = "Pause Timer";
+            }
+        }
+
+        /* ---------------------------------------------------- */
+        /* FLASHCARD LOGIC                                      */
+        /* ---------------------------------------------------- */
+        let currentFilteredCards = [...flashcardsDb];
+        let currentCardIdx = 0;
+
+        function filterFlashcards() {
+            const subject = document.getElementById('flashcard-subject-filter').value;
+            if (subject === 'All') {
+                currentFilteredCards = [...flashcardsDb];
+            } else {
+                currentFilteredCards = flashcardsDb.filter(c => c.subject === subject);
+            }
+            currentCardIdx = 0;
+            updateFlashcardUI();
+        }
+
+        function updateFlashcardUI() {
+            if (currentFilteredCards.length === 0) return;
+            const card = currentFilteredCards[currentCardIdx];
+            const cardEl = document.getElementById('flashcard-card');
+            cardEl.classList.remove('flipped');
+
+            document.getElementById('fc-subject').innerText = card.subject;
+            document.getElementById('fc-front-text').innerText = card.front;
+            document.getElementById('fc-category-subtitle').innerText = `${card.category} Concept`;
+            document.getElementById('fc-back-text').innerText = card.back;
+            document.getElementById('fc-example-text').innerText = `Example / Note: ${card.example}`;
+
+            document.getElementById('fc-counter').innerText = `${currentCardIdx + 1} / ${currentFilteredCards.length}`;
+        }
+
+        function flipFlashcard() {
+            document.getElementById('flashcard-card').classList.toggle('flipped');
+        }
+
+        function nextFlashcard() {
+            currentCardIdx = (currentCardIdx + 1) % currentFilteredCards.length;
+            updateFlashcardUI();
+        }
+
+        function prevFlashcard() {
+            currentCardIdx = (currentCardIdx - 1 + currentFilteredCards.length) % currentFilteredCards.length;
+            updateFlashcardUI();
+        }
+
+        function markFlashcardMastery(isMastered) {
+            const card = currentFilteredCards[currentCardIdx];
+            state.flashcardMastery[card.front] = isMastered;
+            saveState();
+            nextFlashcard();
+        }
+
+        /* ---------------------------------------------------- */
+        /* CHEAT SHEETS LOGIC                                   */
+        /* ---------------------------------------------------- */
+        let activeCheatSubject = 'English';
+
+        function showCheatSheetCategory(subject) {
+            activeCheatSubject = subject;
+            document.querySelectorAll('.cs-tab-btn').forEach(btn => {
+                btn.className = "cs-tab-btn bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3 py-1.5 rounded-lg transition";
+            });
+            const activeBtn = document.getElementById(`cs-btn-${subject}`);
+            if (activeBtn) {
+                activeBtn.className = "cs-tab-btn bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition";
+            }
+            renderCheatSheets();
+        }
+
+        function openCheatSheetCategory(subject) {
+            switchTab('cheatsheets');
+            showCheatSheetCategory(subject);
+        }
+
+        function renderCheatSheets() {
+            const container = document.getElementById('cheatsheet-content-container');
+            container.innerHTML = '';
+
+            const sheets = cheatSheetsDb[activeCheatSubject] || [];
+            sheets.forEach(sheet => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-800/80 border border-slate-700 rounded-xl p-5 space-y-3";
+                
+                let listHtml = sheet.items.map(item => `<li class="flex items-start space-x-2 text-xs text-slate-300"><i class="fa-solid fa-check text-indigo-400 mt-0.5 shrink-0"></i><span>${item}</span></li>`).join('');
+
+                card.innerHTML = `
+                    <h3 class="font-bold text-white text-sm border-b border-slate-700 pb-2 flex items-center justify-between">
+                        <span>${sheet.title}</span>
+                        <i class="fa-solid fa-bookmark text-indigo-400 text-xs"></i>
+                    </h3>
+                    <ul class="space-y-2 pt-1">${listHtml}</ul>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        /* ---------------------------------------------------- */
+        /* CANVAS SCRATCHPAD LOGIC                              */
+        /* ---------------------------------------------------- */
+        let canvas, ctx;
+        let isDrawing = false;
+        let strokeColor = '#38bdf8';
+
+        function initScratchpad() {
+            canvas = document.getElementById('scratchpadCanvas');
+            if (!canvas) return;
+            ctx = canvas.getContext('2d');
+
+            // Responsive size check
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = 320;
+
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = strokeColor;
+
+            // Mouse Events
+            canvas.onmousedown = (e) => { isDrawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
+            canvas.onmousemove = (e) => { if (isDrawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
+            canvas.onmouseup = () => { isDrawing = false; };
+
+            // Touch Events for Mobile
+            canvas.ontouchstart = (e) => {
+                isDrawing = true;
+                const rect = canvas.getBoundingClientRect();
+                ctx.beginPath();
+                ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+            };
+            canvas.ontouchmove = (e) => {
+                if (isDrawing) {
+                    const rect = canvas.getBoundingClientRect();
+                    ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+                    ctx.stroke();
+                }
+            };
+            canvas.ontouchend = () => { isDrawing = false; };
+        }
+
+        function setCanvasColor(color) {
+            strokeColor = color;
+            if (ctx) ctx.strokeStyle = strokeColor;
+        }
+
+        function clearCanvas() {
+            if (ctx && canvas) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        /* ---------------------------------------------------- */
+        /* CALCULATOR LOGIC                                     */
+        /* ---------------------------------------------------- */
+        let calcExpr = "";
+
+        function calcNum(n) {
+            calcExpr += n;
+            updateCalcDisplay();
+        }
+
+        function calcOp(op) {
+            calcExpr += op;
+            updateCalcDisplay();
+        }
+
+        function calcFunc(fn) {
+            if (fn === 'sqrt') calcExpr += "Math.sqrt(";
+            if (fn === 'sin') calcExpr += "Math.sin(";
+            if (fn === 'cos') calcExpr += "Math.cos(";
+            if (fn === 'tan') calcExpr += "Math.tan(";
+            updateCalcDisplay();
+        }
+
+        function calcClear() {
+            calcExpr = "";
+            document.getElementById('calc-display').innerText = "0";
+            document.getElementById('calc-expression').innerText = "";
+        }
+
+        function calcEquals() {
+            try {
+                const res = eval(calcExpr);
+                document.getElementById('calc-expression').innerText = calcExpr;
+                document.getElementById('calc-display').innerText = Number.isInteger(res) ? res : res.toFixed(4);
+                calcExpr = String(res);
+            } catch(e) {
+                document.getElementById('calc-display').innerText = "Error";
+                calcExpr = "";
+            }
+        }
+
+        function updateCalcDisplay() {
+            document.getElementById('calc-display').innerText = calcExpr || "0";
+        }
+
+        /* ---------------------------------------------------- */
+        /* INITIALIZATION                                       */
+        /* ---------------------------------------------------- */
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSavedState();
+            updateDashboardUI();
+            filterPracticeQuestions();
+            updateFlashcardUI();
+        });
+    </script>
+</body>
+</html>
